@@ -9,7 +9,7 @@ class Variable(float):
         self.__define_type = define_type
         self.value = value
         if self.__define_type == "value":
-            self.__error = float(args[1])
+            self.__error = abs(float(args[1]))
         elif self.__define_type == "function":
             self.__function = args[0]
             self.__parameters = args[1]
@@ -22,6 +22,15 @@ class Variable(float):
             n_params = len(self.__parameters)
             parameter_errors = [self.__parameters[i].get_std_error() for i in range(n_params)]
             return (sum([(self.__partial_derivative(i)*parameter_errors[i])**2 for i in range(n_params)])) ** 0.5
+
+    def get_max_error(self):
+        if self.__define_type == "value":
+            return self.__error 
+        else:
+            # compute error from standard deviations
+            n_params = len(self.__parameters)
+            parameter_errors = [self.__parameters[i].get_std_error() for i in range(n_params)]
+            return sum([self.__partial_derivative(i)*parameter_errors[i] for i in range(n_params)])
 
     def __partial_derivative(self, argument_index):
         if self.__define_type != "function":
@@ -59,7 +68,7 @@ class Variable(float):
             return ("value", value)
 
         #parse function and variables definition
-        elif callable(args[0]) and type(args) is tuple:
+        elif callable(args[0]) and type(args[1]) is tuple:
             if any(not isinstance(param, Variable) for param in args[1]):
                 raise Exception("The arguments to the function must be of class Variable")
             else:
@@ -77,9 +86,8 @@ class Variable(float):
 
 if __name__ == "__main__":
     a = Variable(10, 0.1)
-    b = Variable(5, 0.2)
+    b = Variable(lambda x: x+5, 5)
     c = Variable(30, 0.75)
-    print(c.__error)
 
     d = Variable(lambda x, y, z: (x**2 * y**5)/z, (a, b, c))
     print(d, d.value, d.get_std_error())
