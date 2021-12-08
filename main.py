@@ -86,7 +86,7 @@ class Variable(float):
 
 if __name__ == "__main__":
     a = Variable(10, 0.1)
-    b = Variable(lambda x: x+5, 5)
+    b = Variable(10, 5)
     c = Variable(30, 0.75)
 
     d = Variable(lambda x, y, z: (x**2 * y**5)/z, (a, b, c))
